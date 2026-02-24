@@ -241,3 +241,5 @@ Resouces:
                       Resource
                         - !GetAtt IamRoleDataEngineer.Arn # ARN = Amazon Resouces Name - É uma referencia interna da aws ao "id" do usuario
 ```
+# Amazon Kiness
+Produto que facilita a coleta, o processamento e analise de dados de stream. ele permite analisar dados assim que são recebigos e responder instantanemento, em vez de aguar a conclusão da coleta de dados para poder iniciar o processamento (Professor pulou essa etapa de código)
