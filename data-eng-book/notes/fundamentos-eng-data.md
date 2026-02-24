@@ -151,4 +151,44 @@ Suportam múltiplos modelos em um único banco. Dentro de um mesmo banco pode-se
 - CouchBase
 
 ## OLTP vs OLAP
+OLTP (Online transaction Processing) - Processamento de transações em tempo real, foco em operações CRUD, transações curtas e frequentes. Normalmente usa-se MySQL, Postgress
+OLAP (Online analytical Processing) - Processamento para analises em grandes escalas foco em consultar complexas. Normalmente usa o RDS, BigQuery...
+Na prática: Dados fluem do OLTP para OLAP atra´ves de pipeline ETL/ELT. O OLTP mantém o estado atual para operações enquanto o OLAP guarda o histórico para a analise
 
+## Escolhendo o banco de dados certo
+Backend - PostgreSQl
+CMS/Blogs - MongoDB
+Cache - Redis
+Analytics - Bigquery/Snowflake/RDS
+Recomendações - Neo4j
+IOT - influxDB
+Leaderboard gaming - Redis
+Catalogo de produtos - ElasticSearch
+Logs - Cassandra
+
+De maneira geral o PostreSql resolve 80% dos casos, sendo necessário migrar para um banco de dados NoSQL se tiver um requisito específico que bancos relacionais não atendem
+
+## Transações ACID
+### O que são transações acid?
+"ou todas as operações acontem, ou nenhuma acontece" - É como um "botão de desfazer mágico" Se algo der errado em "midway" o banco deve voltar ao estado original, como se nada tivesse acontecido.
+### Termo "ACID"
+ACID é um acrônimo para quatro propriedades que garatem a confiabilidade de transações em bancos de dados
+A - Atomicity: Todas as operações acontecem ou nenhuma acontece
+C - Consistency: A transação deve levar o banco de um estado válido para outro estado válidoI - Isolation: Transações concorrentes nao devem interferir umas nas outras
+D - Durability: Uma vez commitada, a transação é permanente, mesmo em caso de falha
+## Gerenciamento de concorrência
+Deadlocks occore quando duas transações esperam recursivamnete por recursos que a outra segura. Para evitar esse tipo de problema deve-se:
+1. Sempre acessar tabelas na mesma ordem de construção no script. Por exemplo:
+```python
+# BOM: Ordem consistente
+def transferencia(conta_a, conta_b, valor):
+    if conta_a > conta_b:
+        lock_order = (conta_a, conta_b)
+    else:
+        lock_order = (conta_b, conta_a)
+
+    for conta in lock_order:
+        lock(conta)  # Lock em ordem determinística
+```
+2. Manter as transações mais curtas possíveis
+3. Usar timeouts
