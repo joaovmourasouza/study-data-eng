@@ -1,0 +1,61 @@
+Resources:
+  KinesisFirehoseFakeEventsTest:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: kinesis-firehose-fake-web-events
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt KinesisFirehoseBucket.Arn
+        BufferingHints:
+          IntervalInSeconds: 60
+          SizeInMBs: 1
+        CompressionFormat: GZIP
+        ErrorOutputPrefix: bad_record
+        Prefix: "atomic_events/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:hh}/minutes=!{timestamp:mm}/seconds=!{timestamp:ss}"
+        RoleARN: !GetAtt KinesisRole.Arn
+
+  KinesisFirehoseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: kinesis-firehose-bucket-fake-events-bootcamp-test
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  KinesisRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Role to allow Kinesis Firehose to save data to S3
+      ManagedPolicyArns:
+        - !Ref KinesisPolicy
+      Path: /
+      RoleName: role-kinesis
+
+  KinesisPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Policy to allow Kinesis Firehose to access S3
+      Path: /
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:AbortMultipartUpload
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:ListBucketMultipartUploads
+              - s3:PutObject
+            Resource:
+              - !GetAtt KinesisFirehoseBucket.Arn
+              - !Join ["/", [!GetAtt KinesisFirehoseBucket.Arn, "*"]]

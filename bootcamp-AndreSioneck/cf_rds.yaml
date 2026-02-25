@@ -1,0 +1,110 @@
+Resources:
+    MeuRedshift:
+        Type: AWS::Redshift::Cluster
+        Properties:
+            AllowVersionUpgrade: True
+            AutomatedSnapshotRetentionPeriod: 5 # Tempo em dias que será feito uma cópia
+            AvailabilityZone: us-east-1a
+            ClusterIdentifier: my-redshift-cluster
+            ClusterParameterGroupName: !Ref RedshiftParameterGroup
+            ClusterSubnetGroupName: !Ref RedshiftSubnetGroup
+            VpcSecurityGroupIds:
+                - !Ref RedshiftEC2SecurityGroup
+            ClusterType: multi-node
+            DBName: production
+            Encrypted: True
+            MasterUsername: admin # Não deve ficar aqui, pois esse arquivo vai subir para o Github
+            MasterUserPassword: Admin1234
+            NodeType: dc2.large
+            NumberOfNodes: 2 # Quantidade de máquina que será usada
+            PubliclyAccessible: true # Acesso público, pois o prof queria que a gente acessase também
+            IamRoles:
+                - !GetAtt RedshiftRole.Arn
+
+    RedshiftRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                              - redshift.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            ManagedPolicyArns:
+                - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+
+    RedshiftParameterGroup: # Para criar um RDS é necessário criar um ParameterGroup e referencia-lo
+        Type: AWS::Redshift::ClusterParameterGroup
+        Properties:
+            Description: Parameter group for redshift cluster
+            ParameterGroupFamily: redshift-1.0 # Parametro padrão para o RDS
+            Parameters: # De que forma quer que o banco de dados escale?
+                - ParameterName: max_concurrency_scaling_cluster
+                  ParameterValue: 1
+
+    RedshiftSubnetGroup: # Da mesma forma é necessário criar um group para o subnetgroup
+        Type: AWS::Redshift::ClusterSubnetGroup
+        Properties:
+            Description: Redshift Subnet Group
+            SubnetIds:
+                - !Ref RedshiftSubnet
+
+    # Deve-se criar tbm o Subnet
+    RedshiftSubnet:
+        Type: AWS::EC2::Subnet
+        Properties:
+            AvailabilityZone: us-east-1a
+            CidrBlock: 10.0.0.0/24 # Define o tamanho da subnet, ou seja, a quantidade de ips possíveis de serem acessados
+            VpcId: !Ref RedshiftVPC
+
+    RedshiftVPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.0.0.0/16
+
+    RedshiftEC2SecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Security group for Redshift. Public acess
+            GroupName: redshift-security-group
+            SecurityGroupEgress:
+                - CidrIp: 0.0.0.0/0 # Deixar dessa forma, qualquer pessoa do mundo pode acessar esse redshift
+                  FromPort: 5439
+                  IpProtocol: tcp
+                  ToPort: 5439
+            SecurityGroupIngress:
+                - CidrIp: 0.0.0.0/0
+                  FromPort: 5439
+                  IpProtocol: tcp
+                  ToPort: 5439
+            VpcId: !Ref RedshiftVPC
+
+    RedshiftVPCAttachGateway: # Conectar o RDS a internet
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            VpcId: !Ref RedshiftVPC
+            InternetGatewayId: !Ref RedshiftVPCInternetGateway
+
+    RedshiftVPCInternetGateway:
+        Type: AWS::EC2::InternetGateway
+
+    RedshiftRouterTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref RedshiftVPC
+
+    RedshiftVPCRouter:
+        Type: AWS::EC2::Route
+        Properties:
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref RedshiftVPCInternetGateway
+            RouteTableId: !Ref RedshiftRouterTable
+
+    RedshiftSubnetRouterTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            RouteTableId: !Ref RedshiftRouterTable
+            SubnetId: !Ref RedshiftSubnet
