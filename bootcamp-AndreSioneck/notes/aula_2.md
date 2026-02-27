@@ -69,3 +69,93 @@ def create_or_update_stack():
 def _get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__), path)
 ```
+## Github actions
+Configuração do githubactions. 1° bloco captura de qual branch vai ser pego as modificações.2° bloco é o bloco de ações a serem feitas, tipo de sistema, libs a serem instaladas, secretes etc.
+```yaml
+on:
+    push: 
+        branches:
+            - main # Aqui pode modificar qual a branch que deve "ouvir" para fazer a ação
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Set up Python
+              uses: actions/setup-python@v2
+              with:
+                python-version:'3.x'
+            - name: Install dependecies
+              run: |
+                pip install -r requirements.txt
+            - name: Deploy
+              env:
+                SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+                REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+                REMOTE_USER: ${{ secrets.REMOTE_USER }}
+              run:
+                python "arquivo a ser executado. Ex. "main.py""
+```
+
+Caso queria criar uma outra action para fazer teste o ideal é fazer 2 jobs
+
+```yaml
+on:
+  push: 
+    branches:
+      - main
+
+jobs:
+  # --- Novo Job de Teste ---
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # Atualizei para v4 (mais estável/rápido)
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Se usar pytest ou outro framework, instale-o aqui se não estiver no requirements
+          # pip install pytest 
+
+      - name: Run tests
+        run: |
+          # Altere para o comando que você usa (ex: pytest, unittest ou python -m unittest)
+          python -m unittest discover tests 
+
+  # --- Job de Deploy (Só roda se o 'test' passar) ---
+  deploy:
+    needs: test # Esta linha garante a ordem correta
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          
+      - name: Deploy
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        run: |
+          # Aqui você geralmente usa SSH para rodar o comando no seu servidor remoto
+          # Exemplo: ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "cd /app && python main.py"
+          python "seu_arquivo_principal.py"
+```
+
+## Proteção de branch
+cria pr e checks para verificar antes de enviar os ajustes
