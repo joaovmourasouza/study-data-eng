@@ -158,4 +158,64 @@ jobs:
 ```
 
 ## Proteção de branch
-cria pr e checks para verificar antes de enviar os ajustes
+criar pr e checks para verificar antes de enviar os ajustes
+
+## Jinja
+Ferramenta para template web em python. Permite criação de diferentes ambientes (dev, staging, prod) e substituição de credenciais durante a execução ou deploy. Sua principal função é permitir a criação de código dinâmico, inserindo lógica (condicionais, loops, variáveis) dentro de arquivos que, de outra forma, seriam estáticos (como SQL ou YAML)
+
+```yaml
+# Criação de um Redshift com variáveis dinâmicas (parte do código)
+[...]
+RedshiftCluster
+    Type: AWS::Redshift::Cluster
+    Properties:
+        AllowVersionUpgrade: True
+        [...]
+        CluterIdentifier: redshift-{{ EVIRONMENT }}-cluster # Essa variavel vai ser tirada do arquivo de config (normalmente, config.yaml)
+[...]
+```
+
+Exemplo de criação do arquivo config.yaml
+```yaml
+enviroments:
+    - name: production
+      vpcCidrBlock: 10.0.0.0/16
+      subnetCidrBlock:10.0.0.0/24
+    - name: staging
+      vpcCidrBlock:10.1.0.0/16
+      SubnetCidrBlock: 10.1.0.0/24
+
+redshiftCluster:
+    dbName: app # Vai usar essa variavel, para preenchimento do redshift-{{ EVIROMENT }}-cluter no código acima
+    nodeType: dc2.large 
+    numberOfNodes: 2
+    securityGroup:
+        whiteListedIps:
+            - 5.6.7.8/32
+            - 1.2.3.4/32
+            - 9.10.11.12/32
+```
+Para a execução deve-se criar um arquivo em .py
+
+```python
+import jinja2
+import yaml
+import os
+
+def redenrize_template():
+    with open('redshift.yaml.j2', 'r') as f:
+        redshift_yaml = f.read()
+
+    with open('config,yml', 'r') as f:
+        config = yaml.safe_load(f)
+
+    redshift_template = jinja2.Template(redshift_yaml) # Nome do arquivo que está o template
+    redshift_rendered = redshift_template.render({**config, **os.enviro)}
+
+    with open('redshift.yml', 'w') as f: # Aqui ele escreve um novo arquivo com as configurações já setadas
+        f.write(redshift_rendered)
+```
+## Conceitos de AWS CDK (Cloud Development Kit)
+Framework de desenvolvimento de software para definiçao de infraestrutura cloud e provisionamento usando o CloudFormation por trás dos panos.
+Ao invés de codar usando a formatação do cloudformation usa-se liguagem de programação, seja python, ts, js, java...
+Com o CDK dá para usar lógica, usar python com autocompletition, usar OOP para criar um modelo, organizar o projeto em módulos lógicos, fazer teste de infraestrutura...
