@@ -192,3 +192,100 @@ def transferencia(conta_a, conta_b, valor):
 ```
 2. Manter as transações mais curtas possíveis
 3. Usar timeouts
+
+# Capitulo 4 - SQL Essencial
+Dominar o DML e DDL
+
+# DDL - Data Definition Language
+Comandos para criar, modificar e deletar estruturas do banco de dados
+- CREATE: Cria tabelas, índices, views, etc.
+```sql
+CREATE TABLE usuarios (
+    id INT PRIMARY KEY,
+    nome VARCHAR(100),
+    email VARCHAR(100),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+```sql
+CREATE DATABASE minha_base;
+```
+- ALTER: Modifica tabelas existentes (adicionar/remover colunas, constraints)
+```sql
+ALTER TABLE usuarios
+ADD COLUMN data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+```
+- DROP: Deleta tabelas, índices, views, etc.
+```sql
+DROP TABLE usuarios;
+```
+ou
+```sql
+DROP DATABASE minha_base;
+```
+- TRUNCATE: Remove todos os registros de uma tabela de forma rápida
+```sql
+TRUNCATE TABLE usuarios;
+```
+## Tipos de dados
+- Serial: Inteiro que incrementa automaticamente
+- Varchar: Texto de tamanho variável
+- Timestamp: Data e hora
+- Boolean: Verdadeiro ou falso
+- Decimal: Números com precisão decimal
+- Text: Texto longo
+- JSON: Dados semi-estruturados
+- Array: Lista de valores
+
+## Explicação das constraints
+- Primary Key: Identificador único da tabela
+- Foreign Key: Chave estrangeira que referencia outra tabela
+- Unique: Valor único na coluna
+- Not Null: Valor não pode ser nulo
+- Check: Valor deve atender a uma condição
+- Default: Valor padrão se não for informado
+
+# DML - Data Manipulation Language
+Comandos para manipular dados em tabelas
+- INSERT: Insere dados em tabelas
+```sql
+INSERT INTO usuarios (nome, email) VALUES ('Ana Silva', 'ana@email.com');
+```
+- UPDATE: Atualiza dados em tabelas
+```sql
+UPDATE usuarios SET email = 'ana.silva@email.com' WHERE nome = 'Ana Silva';
+```
+- DELETE: Deleta dados de tabelas
+```sql
+DELETE FROM usuarios WHERE nome = 'Ana Silva';
+```
+- SELECT: Seleciona dados de tabelas
+```sql
+SELECT * FROM usuarios;
+```
+
+# DELETE vs Drop vs Truncate
+## DELETE
+- Remove linhas específicas
+- Mantém a estrutura da tabela
+- Pode ser revertido com ROLLBACK
+- Mais lento
+```sql
+DELETE FROM usuarios WHERE nome = 'Ana Silva';
+```
+## TRUNCATE
+- Remove todas as linhas da tabela
+- Reduz o tamanho da tabela
+- Não pode ser revertido com ROLLBACK
+- Mais rápido
+```sql
+TRUNCATE TABLE usuarios;
+```
+## DROP
+- Remove a tabela inteira
+- Remove a estrutura da tabela
+- Não pode ser revertido com ROLLBACK
+- Mais rápido
+```sql
+DROP TABLE usuarios;
+```
