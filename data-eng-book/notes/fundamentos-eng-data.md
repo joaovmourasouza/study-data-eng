@@ -196,7 +196,7 @@ def transferencia(conta_a, conta_b, valor):
 # Capitulo 4 - SQL Essencial
 Dominar o DML e DDL
 
-# DDL - Data Definition Language
+## DDL - Data Definition Language
 Comandos para criar, modificar e deletar estruturas do banco de dados
 - CREATE: Cria tabelas, índices, views, etc.
 ```sql
@@ -227,7 +227,7 @@ DROP DATABASE minha_base;
 ```sql
 TRUNCATE TABLE usuarios;
 ```
-## Tipos de dados
+### Tipos de dados
 - Serial: Inteiro que incrementa automaticamente
 - Varchar: Texto de tamanho variável
 - Timestamp: Data e hora
@@ -237,7 +237,7 @@ TRUNCATE TABLE usuarios;
 - JSON: Dados semi-estruturados
 - Array: Lista de valores
 
-## Explicação das constraints
+### Explicação das constraints
 - Primary Key: Identificador único da tabela
 - Foreign Key: Chave estrangeira que referencia outra tabela
 - Unique: Valor único na coluna
@@ -245,7 +245,7 @@ TRUNCATE TABLE usuarios;
 - Check: Valor deve atender a uma condição
 - Default: Valor padrão se não for informado
 
-# DML - Data Manipulation Language
+## DML - Data Manipulation Language
 Comandos para manipular dados em tabelas
 - INSERT: Insere dados em tabelas
 ```sql
@@ -264,8 +264,8 @@ DELETE FROM usuarios WHERE nome = 'Ana Silva';
 SELECT * FROM usuarios;
 ```
 
-# DELETE vs Drop vs Truncate
-## DELETE
+### DELETE vs Drop vs Truncate
+#### DELETE
 - Remove linhas específicas
 - Mantém a estrutura da tabela
 - Pode ser revertido com ROLLBACK
@@ -273,7 +273,7 @@ SELECT * FROM usuarios;
 ```sql
 DELETE FROM usuarios WHERE nome = 'Ana Silva';
 ```
-## TRUNCATE
+#### TRUNCATE
 - Remove todas as linhas da tabela
 - Reduz o tamanho da tabela
 - Não pode ser revertido com ROLLBACK
@@ -281,7 +281,7 @@ DELETE FROM usuarios WHERE nome = 'Ana Silva';
 ```sql
 TRUNCATE TABLE usuarios;
 ```
-## DROP
+#### DROP
 - Remove a tabela inteira
 - Remove a estrutura da tabela
 - Não pode ser revertido com ROLLBACK
@@ -289,3 +289,104 @@ TRUNCATE TABLE usuarios;
 ```sql
 DROP TABLE usuarios;
 ```
+
+## DQL - Data Query Language
+Comandos para consultar dados em tabelas
+
+### Select
+Comando para selecionar dados de uma tabela
+
+### Concatenacao
+Comando para concatenar strings
+```sql
+select nome || ' ' || sobrenome as nome_completo from usuarios;
+```
+### Where
+Comando para filtrar dados
+
+#### Operadores
+- =: Igual
+- !=: Diferente
+- >: Maior
+- <: Menor
+- >=: Maior ou igual
+- <=: Menor ou igual
+- LIKE: Similar a
+- IN: Dentro de uma lista
+- BETWEEN: Entre dois valores
+- AND: Conjunção
+- OR: Disjunção
+- NOT: Negação
+
+### Pattern matching
+Comando para buscar padrões em strings
+```sql
+select * from usuarios where nome like 'Ana%';
+```
+### Order by
+Comando para ordenar dados, sendo ASC (default) e DESC para decrescente
+```sql
+select * from usuarios order by nome asc;
+```
+### Limit
+Comando para limitar a quantidade de resultados
+```sql
+select * from usuarios limit 10;
+```
+### Offset
+Comando para pular resultados
+```sql
+select * from usuarios offset 10;
+```
+"Depois de 10 resultados"
+### Group by
+Comando para agrupar resultados, agrupa linhas que têm os mesmos valores e calcula agregações para cada grupo.
+```sql
+select * from usuarios group by nome;
+```
+### Having
+Comando para filtrar resultados agrupados
+```sql
+select * from usuarios group by nome having count(*) > 1;
+```
+#### Having vs Where
+- Where filtra linhas antes de agrupar
+- Having filtra grupos após agrupar
+
+### Join
+Comando para unir tabelas
+```sql
+select * from usuarios join contas on usuarios.id = contas.usuario_id;
+```
+- Inner join: Retorna apenas as linhas que existem em ambas as tabelas
+- Left join: Retorna todas as linhas da tabela esquerda e as linhas da tabela direita que correspondem
+- Right join: Retorna todas as linhas da tabela direita e as linhas da tabela esquerda que correspondem
+- Full join: Retorna todas as linhas de ambas as tabelas
+- Cross join: Retorna todas as linhas de ambas as tabelas
+### Distinct
+Comando para remover duplicatas
+```sql
+select distinct nome from usuarios;
+```
+### Agregagções
+Comando para agrupar resultados, resumindo os dados apartir de calculo totais, médias, etc
+```sql
+select nome, count(*) from usuarios group by nome;
+```
+- Count(*): Conta o número de linhas
+- Count(column): Conta o número de linhas que não são nulas
+- Sum(column): Soma os valores de uma coluna
+- Avg(column): Calcula a média dos valores de uma coluna
+- Max(column): Retorna o valor máximo de uma coluna
+- Min(column): Retorna o valor mínimo de uma coluna
+
+## Ordem de execução
+1. FROM: Especifica a tabela ou tabelas
+2. JOIN: Une as tabelas
+3. WHERE: Filtra as linhas
+4. GROUP BY: Agrupa as linhas
+5. HAVING: Filtra os grupos
+6. SELECT: Seleciona as colunas
+7. DISTINCT: Remove duplicatas
+8. ORDER BY: Ordena as linhas
+9. LIMIT: Limita o número de linhas
