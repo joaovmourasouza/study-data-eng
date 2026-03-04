@@ -1,19 +1,20 @@
-from aws_cdk import (
-    # Duration,
-    Stack,
-    # aws_sqs as sqs,
-)
+from aws_cdk import Stack
 from constructs import Construct
+
+from data_platform.data_lake.base import DataLakeBase, DataLakeBucketEnum
+from data_platform.enviroment import EnviromentEnum
 
 class BootcampDataPlatformStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # The code that defines your stack goes here
-
-        # example resource
-        # queue = sqs.Queue(
-        #     self, "BootcampDataPlatformQueue",
-        #     visibility_timeout=Duration.seconds(300),
-        # )
+        enviroment = EnviromentEnum.PRD # Fix hardcode environment based on os.environ if needed, but PRD is fine for now
+        
+        # Instantiate the Raw bucket
+        self.raw_bucket = DataLakeBase(
+            self, 
+            construct_id="DataLakeRawBucket", 
+            enviroment=enviroment, 
+            layer=DataLakeBucketEnum.RAW
+        )
