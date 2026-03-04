@@ -45,18 +45,18 @@ class DataLakeBase(s3.Bucket):
             enabled=True,
         )
         self.add_lifecycle_rule(
-            noncurrent_version_expiration=[
-                s3.NoncurrentVersionExpiration(
+            noncurrent_version_transitions=[
+                s3.NoncurrentVersionTransition(
                     storage_class=s3.StorageClass.INFREQUENT_ACCESS,
-                    noncurrent_days=30,
+                    transition_after=Duration.days(30),
                 ),
-                s3.NoncurrentVersionExpiration(
+                s3.NoncurrentVersionTransition(
                     storage_class=s3.StorageClass.GLACIER,
-                    noncurrent_days=365,
+                    transition_after=Duration.days(365),
                 ),
-                s3.NoncurrentVersionExpiration(
+                s3.NoncurrentVersionTransition(
                     storage_class=s3.StorageClass.DEEP_ARCHIVE,
-                    noncurrent_days=3650,
+                    transition_after=Duration.days(3650),
                 ),
             ]
         )
