@@ -18,3 +18,19 @@ class BootcampDataPlatformStack(Stack):
             enviroment=enviroment, 
             layer=DataLakeBucketEnum.RAW
         )
+
+        # Instantiate the Clean bucket
+        self.clean_bucket = DataLakeBase(
+            self, 
+            construct_id="DataLakeCleanBucket", 
+            enviroment=enviroment, 
+            layer=DataLakeBucketEnum.CLEAN
+        )
+
+        # Instantiate the Processed bucket
+        self.processed_bucket = DataLakeBase(
+            self, 
+            construct_id="DataLakeProcessedBucket", 
+            enviroment=enviroment, 
+            layer=DataLakeBucketEnum.PROCESSED
+        )
