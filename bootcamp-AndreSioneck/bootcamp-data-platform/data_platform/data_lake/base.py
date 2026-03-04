@@ -24,6 +24,8 @@ class DataLakeBase(s3.Bucket):
             **kwargs
         )
 
+        self.set_default_lifecycle_rules()
+
     @property
     def default_block_public_access(self) -> s3.BlockPublicAccess:
         return s3.BlockPublicAccess(
