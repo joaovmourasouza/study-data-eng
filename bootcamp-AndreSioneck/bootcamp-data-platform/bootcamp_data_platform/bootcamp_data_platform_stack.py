@@ -6,10 +6,8 @@ from data_platform.enviroment import EnviromentEnum
 
 class BootcampDataPlatformStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, enviroment: EnviromentEnum, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        enviroment = EnviromentEnum.PRD # Fix hardcode environment based on os.environ if needed, but PRD is fine for now
         
         # Instantiate the Raw bucket
         self.raw_bucket = DataLakeBase(
