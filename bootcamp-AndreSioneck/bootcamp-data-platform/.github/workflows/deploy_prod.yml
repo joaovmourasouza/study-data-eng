@@ -37,4 +37,3 @@ jobs:
           ENVIROMENT: PRD
         run: |
           cdk deploy --all --context deploy_enviroment=prd
-        
