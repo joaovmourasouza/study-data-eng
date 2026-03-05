@@ -1,68 +1,98 @@
 # O que é engenharia de dados?
+
 Disciplina tecnica que foca no projeto, contrução e manuteção de sistemas que coletam, processam, armazenam e disponibilza dados. Esses profissionais, sempre pensam em escalar esse sistema, qualidade e segurança dos dados.
+
 # Analogia com engenharia de dados
+
 Asssm como engenheiro civis garantem que a água chegue de forma confiavel na torneira, Data Eng. garatem que dados cheguem aos usuarios quando necessário.Em ambos os casos a fonte é variavel e imprevisível, assim, o sistema deve ser robosto e confiável para o fornecimento, pois o consumidor espera consistência e qualidade na entrega.
+
 # Estrutura de dados
+
 1. Bronze: Dados como eles são extraidos
 2. Silver: Dados limpos e padronizados
 3. Gold: Agregados e prontos para consumo
+
 ## Pipeline muito comum
+
 1. Ingestão usando Python Scritps e utilizando o Airflow para fazer o orquestramento desses Scripts
 2. Armazenados em um "Data Lake" (por exemplo, AWS S3) - Aqui é a camada Bronze
 3. Processamento usando Spark (Jobs Spark processam grandes volumes de dados, por exemplo, calculo de métricas como ticket médio, LTV, churnrate) - Aqui a camada é Silver
 4. Transformação usando o dbt - Aqui a camada é Gold
 5. Disponibilização: Data warehouse otimizado para consultas analíticas; Analysts fazem queries para criar dashboards; Data scientists exportam dados para treinar modelos
-# As duas etapas da Data Eng.
+
+# As duas etapas da Data Eng
+
 1. Fundação das operações: Coleta - scripts (Python + Apache airflow) que trazem dados de fontes externas; Armazenamento - bancos de dados, datalake, datawarehouse (S3, Postegress SnowFlake); processamento - Clusters, servidores, containers (Apache Spark cluster em Kubernets); Orquestração - sistemas que agendam e coordenam jobs (Airflow); Segurança - acesso, criptografia e governança (IAM, Criptografia). Uma analogia: Antes de ter carros circulando em uma rodovia é necessário planejar rotas, preparas terreno, asfaltar, instalar sinalizações e construir pontes e tuneis.
 2. Construção de pipelines de dados: Dado a infraestrutura escolhida é o momento de colocar a mão na massa executando a construção do pipeline de dados; Um pipeline é uma serie de steps que Extraem, transforma e carregam os dados para um destino.
-# Responsabilidades de um Data Eng.
+
+# Responsabilidades de um Data Eng
+
 1. Construir e manter a infraestrutura escalável: Garantir o crescimento do sistema de dados sem quebrar e resistente a falhas
 2. Garantir qualidade, segurança e governança: Qualidade dos dados devem ser garantidas através de validações, valores dentro de ranges esperados e Unicidade; Segurança é garantida quando cada usuario tem acesso apenas ao que precisa, dados são criptografados e anonimizados, auditoria de logs, quem acesso e quando foi acessado
 3. Otimizar custos: Gerenciamento dos custos de infraestrutura de dados. Desligamento de clusteres quando não estiverem sendo usados (auto-sacling), arquivamentos ou compreensão dos dados antigos, minimizar cross-region transfer, otimização de queries, uso de índices no db e materialized views
 4. Monitoramento e manutenção de pipelines: verificação se os pipelines estão funcionando corretamento atraves de métricas como Latencia (demora para finalizar um job), Throughput volume de dados processados por hora, taxa de erro atraves de um registro percentual de erro, custo e data freshness verificação desde a última atualização
+
 # Capitulo 3 - Fundamentos de bancos de Dados
+
 ## RDBMS - RELATIONAL DATA BASE MODEL SYSTEM
-Dados organizados em tabelas (com colunas e linhas) e relações (PK e FK). 
+
+Dados organizados em tabelas (com colunas e linhas) e relações (PK e FK).
 Sendo a linguagem padrão para a manipulação a SQL (STRUCTURED QUERY LANGUAGE).
 A estrutura deve ser definada antes de inserir os dados, o que permite ter consistencia garantida, otimização antecipada, porém tem pouca flexibilidade e migrações dificies e custosas.
 
 ### Integridade referencial
+
 As relações devem ser explicidamente definidas e enforced (imposto) pelo banco. O quer isso garante? Não permite inserir um pedido com um client_id inexistente e/ou deletar um cliente todos os pedidos são deletado (fomoso CASCADE)
 
 ### Normalização
+
 Dados são organizados para minimizar redundâncias:
+
 - 1NF: cada célula é individual, nao tendo ligações com outras (Atomica)
 - 2NF: Todos os atributos não-chave dependem da chave primária
 - 3NF: Não há dependências transitivas
 
 ## No SQL
+
 Bancos que não utiliza o modelo relacional, priorizam flexibilidade de esquema e escalabilidade, sacrificam algumas garantias acid por performace e escala.
 Armazenam dados como documentos do tipo Json/Bson
 
 ## Diferença entre os tipos de bancos NoSQL
+
 ### No SQL para Documento - Documentos seguem a estrutura padrão de Json
+
 - MongoDB
 - CouchDB
 - Firestore
 - Elasticsearch
-#### Caracteristicas:
+
+#### Caracteristicas
+
 - Schema-flexible: Cada documento pode ter estrutura diferente
 - Nested Documents: Suporte natural a estruturas hierárquicas
 - Arrays: Listas nativas dentro do documento
 - Rich Queries: Consultas por campos aninhados
-### No SQL para Chave-Valor - Armazenam pares simples de chave-valor, como um dicionário distribuído gigante.
+
+### No SQL para Chave-Valor - Armazenam pares simples de chave-valor, como um dicionário distribuído gigante
+
 - Redis (Padrão da industria)
 - MemCached
 - DynamoDB
 - Cassandra
-#### Caracteristicas:
+
+#### Caracteristicas
+
 - Extrema performance
 - Simplicidade: Api minimalista (Get, Set, Delete)
 - In-memory: Dados ficam armazenados na RAM
 - Data structures: Lista, sets, sorted sets, hashes
+
 #### Cuidado
+
 A maioria desses dados é in-memory, ou seja, se o servidor cair antes de persistir no disco, dados serão perdidos.
+
 #### Exemplo de código de criação
+
 ```python
 import redis
 import json
@@ -107,12 +137,16 @@ views = r.incr("produto:5001:views")
 ```
 
 ### No SQL para Grafo (Nodes e Edges) - Projetados especificamente para dados com relações complexas
+
 - Neo4j (padrão do mercado)
 - ArangoDB
 - AmazonNeptune
+
 #### Casos de uso
+
 - Redes sosicias
 - Roteamento (caminhos mais curtos)
+
 ```
 -- Criar nós
 CREATE (ana:Pessoa {nome: "Ana Silva", email: "ana@email.com"})
@@ -141,21 +175,30 @@ RETURN skill.nome, count(*) as frequencia
 ORDER BY frequencia DESC
 LIMIT 5
 ```
+
 ## Outros modelos NoSQL
+
 ### Banco colunares (wide-column stores)
+
 Projetas para escalar horizontalmente, dados são priorizados pelas colunas é ideal para time-series e dados de alta throughput. Sendo os mais comuns:
+
 - InfluxDb, TimescaleDB: otimizados para dados temporais, normalmente usados em Iot, finacial data
+
 ### Bancos multimodelos
+
 Suportam múltiplos modelos em um único banco. Dentro de um mesmo banco pode-se aplicar o Documentos + Grafos + Key-value
+
 - ArangoDb
 - CouchBase
 
 ## OLTP vs OLAP
+
 OLTP (Online transaction Processing) - Processamento de transações em tempo real, foco em operações CRUD, transações curtas e frequentes. Normalmente usa-se MySQL, Postgress
 OLAP (Online analytical Processing) - Processamento para analises em grandes escalas foco em consultar complexas. Normalmente usa o RDS, BigQuery...
 Na prática: Dados fluem do OLTP para OLAP atra´ves de pipeline ETL/ELT. O OLTP mantém o estado atual para operações enquanto o OLAP guarda o histórico para a analise
 
 ## Escolhendo o banco de dados certo
+
 Backend - PostgreSQl
 CMS/Blogs - MongoDB
 Cache - Redis
@@ -169,16 +212,24 @@ Logs - Cassandra
 De maneira geral o PostreSql resolve 80% dos casos, sendo necessário migrar para um banco de dados NoSQL se tiver um requisito específico que bancos relacionais não atendem
 
 ## Transações ACID
+
 ### O que são transações acid?
+
 "ou todas as operações acontem, ou nenhuma acontece" - É como um "botão de desfazer mágico" Se algo der errado em "midway" o banco deve voltar ao estado original, como se nada tivesse acontecido.
+
 ### Termo "ACID"
+
 ACID é um acrônimo para quatro propriedades que garatem a confiabilidade de transações em bancos de dados
 A - Atomicity: Todas as operações acontecem ou nenhuma acontece
 C - Consistency: A transação deve levar o banco de um estado válido para outro estado válidoI - Isolation: Transações concorrentes nao devem interferir umas nas outras
 D - Durability: Uma vez commitada, a transação é permanente, mesmo em caso de falha
+
 ## Gerenciamento de concorrência
+
 Deadlocks occore quando duas transações esperam recursivamnete por recursos que a outra segura. Para evitar esse tipo de problema deve-se:
+
 1. Sempre acessar tabelas na mesma ordem de construção no script. Por exemplo:
+
 ```python
 # BOM: Ordem consistente
 def transferencia(conta_a, conta_b, valor):
@@ -190,15 +241,20 @@ def transferencia(conta_a, conta_b, valor):
     for conta in lock_order:
         lock(conta)  # Lock em ordem determinística
 ```
-2. Manter as transações mais curtas possíveis
-3. Usar timeouts
+
+1. Manter as transações mais curtas possíveis
+2. Usar timeouts
 
 # Capitulo 4 - SQL Essencial
+
 Dominar o DML e DDL
 
 ## DDL - Data Definition Language
+
 Comandos para criar, modificar e deletar estruturas do banco de dados
+
 - CREATE: Cria tabelas, índices, views, etc.
+
 ```sql
 CREATE TABLE usuarios (
     id INT PRIMARY KEY,
@@ -207,27 +263,38 @@ CREATE TABLE usuarios (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
 ```sql
 CREATE DATABASE minha_base;
 ```
+
 - ALTER: Modifica tabelas existentes (adicionar/remover colunas, constraints)
+
 ```sql
 ALTER TABLE usuarios
 ADD COLUMN data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 ```
+
 - DROP: Deleta tabelas, índices, views, etc.
+
 ```sql
 DROP TABLE usuarios;
 ```
+
 ou
+
 ```sql
 DROP DATABASE minha_base;
 ```
+
 - TRUNCATE: Remove todos os registros de uma tabela de forma rápida
+
 ```sql
 TRUNCATE TABLE usuarios;
 ```
+
 ### Tipos de dados
+
 - Serial: Inteiro que incrementa automaticamente
 - Varchar: Texto de tamanho variável
 - Timestamp: Data e hora
@@ -238,6 +305,7 @@ TRUNCATE TABLE usuarios;
 - Array: Lista de valores
 
 ### Explicação das constraints
+
 - Primary Key: Identificador único da tabela
 - Foreign Key: Chave estrangeira que referencia outra tabela
 - Unique: Valor único na coluna
@@ -246,65 +314,90 @@ TRUNCATE TABLE usuarios;
 - Default: Valor padrão se não for informado
 
 ## DML - Data Manipulation Language
+
 Comandos para manipular dados em tabelas
+
 - INSERT: Insere dados em tabelas
+
 ```sql
 INSERT INTO usuarios (nome, email) VALUES ('Ana Silva', 'ana@email.com');
 ```
+
 - UPDATE: Atualiza dados em tabelas
+
 ```sql
 UPDATE usuarios SET email = 'ana.silva@email.com' WHERE nome = 'Ana Silva';
 ```
+
 - DELETE: Deleta dados de tabelas
+
 ```sql
 DELETE FROM usuarios WHERE nome = 'Ana Silva';
 ```
+
 - SELECT: Seleciona dados de tabelas
+
 ```sql
 SELECT * FROM usuarios;
 ```
 
 ### DELETE vs Drop vs Truncate
+
 #### DELETE
+
 - Remove linhas específicas
 - Mantém a estrutura da tabela
 - Pode ser revertido com ROLLBACK
 - Mais lento
+
 ```sql
 DELETE FROM usuarios WHERE nome = 'Ana Silva';
 ```
+
 #### TRUNCATE
+
 - Remove todas as linhas da tabela
 - Reduz o tamanho da tabela
 - Não pode ser revertido com ROLLBACK
 - Mais rápido
+
 ```sql
 TRUNCATE TABLE usuarios;
 ```
+
 #### DROP
+
 - Remove a tabela inteira
 - Remove a estrutura da tabela
 - Não pode ser revertido com ROLLBACK
 - Mais rápido
+
 ```sql
 DROP TABLE usuarios;
 ```
 
 ## DQL - Data Query Language
+
 Comandos para consultar dados em tabelas
 
 ### Select
+
 Comando para selecionar dados de uma tabela
 
 ### Concatenacao
+
 Comando para concatenar strings
+
 ```sql
 select nome || ' ' || sobrenome as nome_completo from usuarios;
 ```
+
 ### Where
+
 Comando para filtrar dados
 
 #### Operadores
+
 - =: Igual
 - !=: Diferente
 - >: Maior
@@ -319,60 +412,90 @@ Comando para filtrar dados
 - NOT: Negação
 
 ### Pattern matching
+
 Comando para buscar padrões em strings
+
 ```sql
 select * from usuarios where nome like 'Ana%';
 ```
+
 ### Order by
+
 Comando para ordenar dados, sendo ASC (default) e DESC para decrescente
+
 ```sql
 select * from usuarios order by nome asc;
 ```
+
 ### Limit
+
 Comando para limitar a quantidade de resultados
+
 ```sql
 select * from usuarios limit 10;
 ```
+
 ### Offset
+
 Comando para pular resultados
+
 ```sql
 select * from usuarios offset 10;
 ```
+
 "Depois de 10 resultados"
+
 ### Group by
+
 Comando para agrupar resultados, agrupa linhas que têm os mesmos valores e calcula agregações para cada grupo.
+
 ```sql
 select * from usuarios group by nome;
 ```
+
 ### Having
+
 Comando para filtrar resultados agrupados
+
 ```sql
 select * from usuarios group by nome having count(*) > 1;
 ```
+
 #### Having vs Where
+
 - Where filtra linhas antes de agrupar
 - Having filtra grupos após agrupar
 
 ### Join
+
 Comando para unir tabelas
+
 ```sql
 select * from usuarios join contas on usuarios.id = contas.usuario_id;
 ```
+
 - Inner join: Retorna apenas as linhas que existem em ambas as tabelas
 - Left join: Retorna todas as linhas da tabela esquerda e as linhas da tabela direita que correspondem
 - Right join: Retorna todas as linhas da tabela direita e as linhas da tabela esquerda que correspondem
 - Full join: Retorna todas as linhas de ambas as tabelas
 - Cross join: Retorna todas as linhas de ambas as tabelas
+
 ### Distinct
+
 Comando para remover duplicatas
+
 ```sql
 select distinct nome from usuarios;
 ```
+
 ### Agregagções
+
 Comando para agrupar resultados, resumindo os dados apartir de calculo totais, médias, etc
+
 ```sql
 select nome, count(*) from usuarios group by nome;
 ```
+
 - Count(*): Conta o número de linhas
 - Count(column): Conta o número de linhas que não são nulas
 - Sum(column): Soma os valores de uma coluna
@@ -381,6 +504,7 @@ select nome, count(*) from usuarios group by nome;
 - Min(column): Retorna o valor mínimo de uma coluna
 
 ## Ordem de execução
+
 1. FROM: Especifica a tabela ou tabelas
 2. JOIN: Une as tabelas
 3. WHERE: Filtra as linhas
@@ -390,3 +514,169 @@ select nome, count(*) from usuarios group by nome;
 7. DISTINCT: Remove duplicatas
 8. ORDER BY: Ordena as linhas
 9. LIMIT: Limita o número de linhas
+
+## Case com agregações
+
+Case permite criar condições dentro de uma agregação, aparentemente dá um nome a uma agregação
+
+```sql
+SELECT
+    CASE
+        WHEN valor_total < 100 THEN 'baixo'
+        WHEN valor_total < 1000 THEN 'medio'
+        ELSE 'alto'
+    END AS faixa_valor,
+    COUNT(*) AS total_pedidos,
+    SUM(valor_total) AS valor_total
+FROM pedidos
+GROUP BY
+    CASE
+        WHEN valor_total < 100 THEN 'baixo'
+        WHEN valor_total < 1000 THEN 'medio'
+        ELSE 'alto'
+    END
+ORDER BY
+    CASE
+        WHEN valor_total < 100 THEN 1
+        WHEN valor_total < 1000 THEN 2
+        ELSE 3
+    END;
+```
+
+## Funções de texto e data
+
+- upper: Converte texto para maiúsculo -> upper(nome)
+- lower: Converte texto para minúsculo -> lower(nome)
+- concat: Concatena textos -> concat(nome, ' ', sobrenome)
+- length: Retorna o comprimento de uma string -> length(nome)
+- substr: Retorna uma substring -> substr(nome, 1, 3)
+- trim: Remove espaços em branco -> trim(nome)
+- now: Retorna a data e hora atual -> now()
+- date: Retorna apenas a data -> date(now())
+- time: Retorna apenas a hora -> time(now())
+- timestamp: Retorna a data e hora -> timestamp(now())
+- interval: Retorna um intervalo -> interval '1 day'
+- replace: Substitui uma string -> replace(nome, 'a', 'o')
+- position: Retorna a posição de uma string -> position(nome like '%silva%')
+- to_char: Converte uma data para uma string -> to_char(now(), 'YYYY-MM-DD')
+- to_date: Converte uma string para uma data -> to_date('2022-01-01', 'YYYY-MM-DD')
+
+## Subqueries
+
+Subqueries são consultas dentro de consultas
+
+### Subconsultas escalares
+
+Subconsultas escalares são consultas que retornam apenas um valor
+
+```sql
+SELECT nome, email
+FROM clientes
+WHERE id = (
+    SELECT cliente_id
+    FROM pedidos
+    ORDER BY valor_total DESC
+    LIMIT 1
+);
+
+-- Produtos acima da média
+SELECT nome, preco
+FROM produtos
+WHERE preco > (
+    SELECT AVG(preco)
+    FROM produtos
+);
+```
+
+### Subconsultas com IN
+
+Subconsultas que buscam valores em uma lista. O In varre todos os valores da lista.
+
+```sql
+-- Clientes que fizeram pedidos
+SELECT nome, email
+FROM clientes
+WHERE id IN (
+    SELECT DISTINCT cliente_id
+    FROM pedidos
+);
+
+-- Produtos nunca vendidos
+SELECT nome, preco
+FROM produtos
+WHERE id NOT IN (
+    SELECT produto_id
+    FROM pedido_itens
+);
+```
+
+### Subconsultas com Exists
+
+Subconsultas que verificam a existência de registros. O Exists para na primeira correspondência. Por conta disso, é mais rápido que o IN
+
+```sql
+-- Clientes que fizeram pedidos
+SELECT nome, email
+FROM clientes
+WHERE EXISTS (
+    SELECT 1
+    FROM pedidos
+    WHERE pedidos.cliente_id = clientes.id
+);
+
+-- Produtos nunca vendidos
+SELECT nome, preco
+FROM produtos
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM pedido_itens
+    WHERE pedido_itens.produto_id = produtos.id
+);
+```
+
+### Subconsultas correlacionadas
+
+Subconsultas que usam valores da consulta externa para fazer a consulta interna, porém subconsultas correlacionadas podem ser mais lentas que subconsultas escalares
+
+```sql
+-- Pedidos com valor acima da média do cliente
+SELECT
+    c.nome,
+    p.id AS pedido,
+    p.valor_total,
+    (SELECT AVG(valor_total)
+     FROM pedidos
+     WHERE cliente_id = p.cliente_id) AS media_cliente
+FROM pedidos p
+JOIN clientes c ON p.cliente_id = c.id
+WHERE p.valor_total > (
+    SELECT AVG(valor_total)
+    FROM pedidos
+    WHERE cliente_id = p.cliente_id
+);
+```
+
+### CTEs (Common Table Expressions)
+
+CTEs são consultas que podem ser usadas como uma tabela temporária. Permitem que uma consulta seja usada várias vezes na mesma query. Principais vantagens:
+
+- Melhor legibilidade
+- Melhor performance
+- Melhor manutenibilidade
+- Reutilização
+- Mais difícil de debugar
+
+```sql
+WITH media_cliente AS (
+    SELECT cliente_id, AVG(valor_total) AS media
+    FROM pedidos
+    GROUP BY cliente_id
+)
+SELECT
+    p.id AS pedido,
+    p.valor_total,
+    mc.media
+FROM pedidos p
+JOIN media_cliente mc ON p.cliente_id = mc.cliente_id
+WHERE p.valor_total > mc.media;
+```
