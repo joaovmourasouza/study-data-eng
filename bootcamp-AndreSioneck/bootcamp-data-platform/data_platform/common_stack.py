@@ -30,10 +30,10 @@ class CommonStack(Stack):
             engine=rds.DatabaseInstanceEngine.postgres(version=rds.PostgresEngineVersion.VER_15_2),
             parameters={
                 "max_connections": "100",
-                "shared_buffers": "25%",
+                "shared_buffers": "{DBInstanceClassMemory/32768}",
                 "work_mem": "65536",
                 "maintenance_work_mem": "262144",
-                "effective_cache_size": "75%",
+                "effective_cache_size": "{DBInstanceClassMemory/10922}",
                 # "rds.logical_replication": "1", 'wal_sender_timeout': '0'
             },
         )
