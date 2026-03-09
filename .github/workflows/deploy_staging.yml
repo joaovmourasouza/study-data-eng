@@ -38,5 +38,5 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           ENVIROMENT: STG
         run: |
-          cdk deploy --all --context deploy_enviroment=stg
-        
+          cdk deploy --all --context deploy_enviroment=stg --require-approval never
+          
