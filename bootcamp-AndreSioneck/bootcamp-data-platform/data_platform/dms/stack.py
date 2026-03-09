@@ -134,7 +134,6 @@ class OrdersDMS(dms.CfnReplicationTask):
                 cdk.CfnTag(key="Name", value=f"{self.common_stack.enviroment.value}-dms-instance"),
             ],
             publicly_accessible=False,
-            engine_version="3.5.2",
             vpc_security_group_ids = [self.dms_sg.security_group_id]            
         )
 
