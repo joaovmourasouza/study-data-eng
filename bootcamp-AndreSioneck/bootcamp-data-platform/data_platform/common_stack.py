@@ -27,7 +27,7 @@ class CommonStack(Stack):
         self.orders_rds_parameter_group = rds.ParameterGroup(
             self,
             f"orders-rds-parameter-group-{self.enviroment.value}",
-            engine=rds.DatabaseInstanceEngine.postgres(version=rds.PostgresEngineVersion.VER_15_2),
+            engine=rds.DatabaseInstanceEngine.postgres(version=rds.PostgresEngineVersion.VER_15_5),
             parameters={
                 "max_connections": "100",
                 "shared_buffers": "{DBInstanceClassMemory/32768}",
@@ -41,7 +41,7 @@ class CommonStack(Stack):
         self.orders_rds_instance = rds.DatabaseInstance(
             self,
             f"orders-rds-instance-{self.enviroment.value}-rds",
-            engine=rds.DatabaseInstanceEngine.postgres(version=rds.PostgresEngineVersion.VER_15_2),
+            engine=rds.DatabaseInstanceEngine.postgres(version=rds.PostgresEngineVersion.VER_15_5),
             database_name="orders",
             instance_type=ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
             vpc=self.vpc,
