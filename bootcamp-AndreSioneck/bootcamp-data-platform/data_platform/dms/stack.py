@@ -121,6 +121,7 @@ class OrdersDMS(dms.CfnReplicationTask):
             replication_subnet_group_identifier=f"{self.common_stack.enviroment.value}-dms-subnet-group",
             replication_subnet_group_description="DMS Subnet Group",
         )
+        self.dms_subnet_group.node.add_dependency(scope.dms_vpc_role)
         
         self.instance = dms.CfnReplicationInstance(
             scope,
@@ -184,6 +185,18 @@ class DMSStack(Stack):
         self.data_lake_raw_bucket = data_lake_raw_bucket
         
         super().__init__(scope, construct_id, **kwargs)
+
+        # AWS DMS requires standard roles to exist before provisioning replication resources.
+        # If the account never used DMS, this role is missing causing AccessDeniedFault.
+        self.dms_vpc_role = iam.Role(
+            self,
+            "dms-vpc-role",
+            role_name="dms-vpc-role",
+            assumed_by=iam.ServicePrincipal("dms.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonDMSVPCManagementRole")
+            ]
+        )
 
         self.dms_replication_task = OrdersDMS(
             self,
