@@ -680,3 +680,13 @@ FROM pedidos p
 JOIN media_cliente mc ON p.cliente_id = mc.cliente_id
 WHERE p.valor_total > mc.media;
 ```
+
+#### Comparação CTE vs Subqueries
+
+| Característica | CTE | Subquery |
+| --- | --- | --- |
+| Legibilidade | Melhor | Pior |
+| Performance | Melhor | Pior |
+| Manutenibilidade | Melhor | Pior |
+| Reutilização | Melhor | Pior |
+| Debug | Mais fácil | Mais difícil |
