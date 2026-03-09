@@ -83,7 +83,7 @@ class OrdersDMS(dms.CfnReplicationTask):
             ssl_mode="require",
             extra_connection_attributes="",
             tags=[
-                {"Key": "Name", "Value": f"{self.common_stack.enviroment.value}-orders-rds-endpoint"},
+                cdk.CfnTag(key="Name", value=f"{self.common_stack.enviroment.value}-orders-rds-endpoint"),
             ],
         )
         
@@ -116,9 +116,10 @@ class OrdersDMS(dms.CfnReplicationTask):
             f"{self.common_stack.enviroment.value}-dms-subnet-group",
             subnet_ids=[subnet.subnet_id for subnet in self.common_stack.vpc.private_subnets],
             tags=[
-                {"Key": "Name", "Value": f"{self.common_stack.enviroment.value}-dms-subnet-group"},
+                cdk.CfnTag(key="Name", value=f"{self.common_stack.enviroment.value}-dms-subnet-group"),
             ],
             replication_subnet_group_identifier=f"{self.common_stack.enviroment.value}-dms-subnet-group",
+            replication_subnet_group_description="DMS Subnet Group",
         )
         
         self.instance = dms.CfnReplicationInstance(
@@ -128,11 +129,8 @@ class OrdersDMS(dms.CfnReplicationTask):
             replication_subnet_group_identifier=f"{self.common_stack.enviroment.value}-dms-subnet-group",
             allocated_storage=20,
             multi_az=False,
-            deletion_protection=False,
-            backup_retention_period=0,
-            removal_policy=cdk.RemovalPolicy.DESTROY,
             tags=[
-                {"Key": "Name", "Value": f"{self.common_stack.enviroment.value}-dms-instance"},
+                cdk.CfnTag(key="Name", value=f"{self.common_stack.enviroment.value}-dms-instance"),
             ],
             publicly_accessible=False,
             engine_version="3.5.2",
@@ -175,6 +173,7 @@ class DMSStack(Stack):
     def __init__(
         self, 
         scope: Construct, 
+        construct_id: str,
         enviroment: EnviromentEnum,
         common_stack: CommonStack,
         data_lake_raw_bucket: DataLakeBase,
@@ -184,7 +183,7 @@ class DMSStack(Stack):
         self.common_stack = common_stack
         self.data_lake_raw_bucket = data_lake_raw_bucket
         
-        super().__init__(scope, f"{self.deploy_env.value}-dms-stack", **kwargs)
+        super().__init__(scope, construct_id, **kwargs)
 
         self.dms_replication_task = OrdersDMS(
             self,
